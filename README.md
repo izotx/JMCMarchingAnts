@@ -33,4 +33,5 @@ class ViewController: UIViewController {
     }
 }
 ```
-
+<h3>License</h3>
+GNU General Public License V3
