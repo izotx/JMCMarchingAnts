@@ -31,14 +31,7 @@ class ViewController: UIViewController {
     //Initialize the marching ants object
     let marcher:JMCMarchingAnts = JMCMarchingAnts()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        ///apply the effect and everything
-        
-        }
-    
-    
+
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         if let image = imageView.image{
