@@ -19,7 +19,7 @@ class ViewController: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         if let image = imageView.image{
-            //if image exists add it to the image view
+            //if image exists add the selection layer to the image view
             marcher.addAnts(image, imageView: self.imageView)
         }
     }
