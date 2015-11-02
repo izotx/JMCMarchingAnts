@@ -8,6 +8,7 @@ copy the JMCMarchingAnts.swift file to your project
     let marcher:JMCMarchingAnts = JMCMarchingAnts()
 3. Add animated selection layer with a addAnts(image:UIIMage, imageView:UIImageView) method, where image is an image that will be processed, and the imageView is a view that selection layer will be displayed on. 
  marcher.addAnts(image, imageView: self.imageView)
+```Swift 
 class ViewController: UIViewController {
     @IBOutlet weak var imageView: UIImageView!
 
@@ -20,17 +21,8 @@ class ViewController: UIViewController {
         if let image = imageView.image{
             //if image exists add it to the image view
             marcher.addAnts(image, imageView: self.imageView)
-            
         }
-
     }
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-
 }
-
+```
 
