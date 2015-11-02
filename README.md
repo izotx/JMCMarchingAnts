@@ -35,3 +35,6 @@ class ViewController: UIViewController {
 ```
 <h3>License</h3>
 GNU General Public License V3
+<h3>Disclaimer</h3>
+The image of the car was acquired from: http://icons.mysitemyway.com/legacy-icon/038420-glossy-black-icon-transport-travel-transportation-car9-sc44/
+
