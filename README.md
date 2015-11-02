@@ -1,6 +1,6 @@
 # JMCMarchingAnts
 Example of adding marching ants selection to the edges of the images.
-![](https://github.com/izotx/JMCMarchingAnts/blob/master/marchingAnts.gif)
+![](https://raw.githubusercontent.com/izotx/JMCMarchingAnts/master/marchingAnts.gif)
 
 <h3>Usage:</h3>
 1. Copy files:
