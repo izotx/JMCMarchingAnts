@@ -8,6 +8,7 @@ Example of adding marching ants selection to the edges of the images.
 copy the JMCMarchingAnts.swift file to your project
 </li>
 <li> Create an instance of the JMCMarchingAnts class:</li>
+
 ```   
  let marcher:JMCMarchingAnts = JMCMarchingAnts()
 ``` 
