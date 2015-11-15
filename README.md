@@ -3,23 +3,17 @@ Example of adding marching ants selection to the edges of the images.
 ![](https://raw.githubusercontent.com/izotx/JMCMarchingAnts/master/marchingAnts.gif)
 
 <h3>Usage:</h3>
-<ul>
-<li>Copy files:
-copy the JMCMarchingAnts.swift file to your project
-</li>
-<li> Create an instance of the JMCMarchingAnts class:</li>
+* Copy the JMCMarchingAnts.swift file to your project
+* Create an instance of the JMCMarchingAnts class:
 
 ```   
  let marcher:JMCMarchingAnts = JMCMarchingAnts()
 ``` 
-
-<li>
-Add animated selection layer with a addAnts(image:UIIMage, imageView:UIImageView) method, where image is an image that will be processed, and the imageView is a view that selection layer will be displayed on. 
+* Add animated selection layer with a addAnts(image:UIIMage, imageView:UIImageView) method, where image is an image that will be processed, and the imageView is a view that selection layer will be displayed on. 
 ```
  marcher.addAnts(image, imageView: self.imageView)
 ```
-</li>
-</ul>
+
 
 Enjoy yur marching ants! 
 
