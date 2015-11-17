@@ -48,10 +48,9 @@ extension UIImage{
 
     /** Helper function for saving image to png binary */
     func saveToPNG( filename:String){
-        let documentsPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
+        let documentsPath:NSString = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
         let destinationPath = documentsPath.stringByAppendingPathComponent(filename)
-        println(destinationPath)
-        UIImagePNGRepresentation(self).writeToFile(destinationPath, atomically: true)
+        UIImagePNGRepresentation(self)!.writeToFile(destinationPath, atomically: true)
         //UIImageJPEGRepresentation(image,1.0).writeToFile(destinationPath, atomically: true)
         
         
@@ -65,31 +64,31 @@ extension UIImage{
         let context = UIGraphicsGetCurrentContext();
         CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
         CGContextFillRect(context, CGRectMake(0,0,frame.size.width,frame.size.height))
-    foregroundImage.drawInRect(CGRectMake(realFrame.origin.x,realFrame.origin.y,realFrame.size.width,realFrame.size.height), blendMode: kCGBlendModeDestinationOut, alpha: 1.0)
+    foregroundImage.drawInRect(CGRectMake(realFrame.origin.x,realFrame.origin.y,realFrame.size.width,realFrame.size.height), blendMode:CGBlendMode.DestinationOut, alpha: 1.0)
         let cgimage =  CGBitmapContextCreateImage(context);
-        let image = UIImage(CGImage: cgimage)
+        let image = UIImage(CGImage: cgimage!)
         UIGraphicsEndImageContext();
-        return image!;
+        return image;
     }
     
     //Creates a ARGB Image
     func argbImage()->UIImage?
     {
-        let colorSpace:CGColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = CGBitmapInfo(CGImageAlphaInfo.PremultipliedFirst.rawValue)
+        let colorSpace:CGColorSpace = CGColorSpaceCreateDeviceRGB()!
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)
         let bytesPerRow = 4 * self.size.width
-        let context = CGBitmapContextCreate(nil, Int(self.size.width), Int(self.size.height), 8, Int(bytesPerRow), colorSpace, bitmapInfo)
+        let context = CGBitmapContextCreate(nil, Int(self.size.width), Int(self.size.height), 8, Int(bytesPerRow), colorSpace, bitmapInfo.rawValue)
     
         CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(self.size.width), CGFloat(self.size.height)), self.CGImage)
         let cgimage = CGBitmapContextCreateImage(context)
-        let img = UIImage(CGImage: cgimage)
+        let img = UIImage(CGImage: cgimage!)
         return img
     }
    
     //Image from raw bitmap
     internal func imageFromARGB32Bitmap(pixels:[PixelData], width:Int, height:Int)->UIImage? {
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(CGImageAlphaInfo.PremultipliedFirst.rawValue)
+        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)
         let bitsPerComponent:Int = 8
         let bitsPerPixel:Int = 32
         
@@ -100,7 +99,6 @@ extension UIImage{
             NSData(bytes: &data, length: data.count * sizeof(PixelData))
         )
         
-        // let redPixel = PixelData(a: 255, r: 192, g: 0, b: 0)
         
         let cgim = CGImageCreate(
             width,
@@ -113,24 +111,24 @@ extension UIImage{
             providerRef,
             nil,
             true,
-            kCGRenderingIntentDefault
+            CGColorRenderingIntent.RenderingIntentDefault
         )
-        return UIImage(CGImage: cgim)
+        return UIImage(CGImage: cgim!)
     }
 
     //Finds edges in the image (should be black and transparent colors only)
     func findEdges()->UIImage{
-        let cgImage:CGImageRef = self.argbImage()!.CGImage
+        let cgImage:CGImageRef = self.argbImage()!.CGImage!
         ////
-        var pixelData = CGDataProviderCopyData(CGImageGetDataProvider(cgImage))
+        let pixelData = CGDataProviderCopyData(CGImageGetDataProvider(cgImage))
         
         
         //var data = CFDataGetMutableBytePtr
-        var mdata: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
-        var data = UnsafeMutablePointer<UInt8>(mdata)
+        let mdata: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
+        let data = UnsafeMutablePointer<UInt8>(mdata)
         let height = CGImageGetHeight(cgImage)
         let width = CGImageGetWidth(cgImage)
-        var start = CACurrentMediaTime()
+        let start = CACurrentMediaTime()
         
         //create an empty buffer
         let emptyPixel = PixelData(a: 0, r: 0, g: 0, b: 0)
@@ -143,10 +141,10 @@ extension UIImage{
         for var y = 0; y < height-1; y++ {
             for var x = 0; x < width; x++ {
                 //Current one
-                var currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
-                var currentAlpha = CGFloat(data[currentPixelInfo+0]) / CGFloat(255.0)
-                var downPixelInfo: Int = ((Int(width) * Int(y+1)) + Int(x)) * 4
-                var downAlpha = CGFloat(data[downPixelInfo+0]) / CGFloat(255.0)
+                let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
+                let currentAlpha = CGFloat(data[currentPixelInfo+0]) / CGFloat(255.0)
+                let downPixelInfo: Int = ((Int(width) * Int(y+1)) + Int(x)) * 4
+                let downAlpha = CGFloat(data[downPixelInfo+0]) / CGFloat(255.0)
                 
                 if y == 0 && currentAlpha != 0{ // Top Edge
                     booleanArray[currentPixelInfo/4] = true
@@ -155,8 +153,8 @@ extension UIImage{
                 
                 if y > 0 && y < height - 2{
                     //one up
-                    var topPixelInfo: Int = ((Int(width) * Int(y - 1)) + Int(x )) * 4
-                    var topAlpha = CGFloat(data[topPixelInfo]) / CGFloat(255.0)
+                    let topPixelInfo: Int = ((Int(width) * Int(y - 1)) + Int(x )) * 4
+                    let topAlpha = CGFloat(data[topPixelInfo]) / CGFloat(255.0)
                     
                     if downAlpha == 0 && currentAlpha != 0 {//edge
                         booleanArray[currentPixelInfo/4] = true
@@ -183,11 +181,11 @@ extension UIImage{
             for var x = 0; x < width-1; x++ {
                 
                 //Current one
-                var currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
-                var currentAlpha = CGFloat(data[currentPixelInfo]) / CGFloat(255.0)
+                let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
+                let currentAlpha = CGFloat(data[currentPixelInfo]) / CGFloat(255.0)
                 //Next
-                var nextPixelInfo: Int = ((Int(width) * Int(y)) + Int(x + 1)) * 4
-                var nextAlpha = CGFloat(data[nextPixelInfo]) / CGFloat(255.0)
+                let nextPixelInfo: Int = ((Int(width) * Int(y)) + Int(x + 1)) * 4
+                let nextAlpha = CGFloat(data[nextPixelInfo]) / CGFloat(255.0)
                 
                 
                 //check horizontally
@@ -197,8 +195,8 @@ extension UIImage{
                 }
                 if x > 0 && x < width - 2{
                     //One before
-                    var previousPixelInfo: Int = ((Int(width) * Int(y)) + Int(x - 1)) * 4
-                    var previousAlpha = CGFloat(data[previousPixelInfo]) / CGFloat(255.0)
+                    let previousPixelInfo: Int = ((Int(width) * Int(y)) + Int(x - 1)) * 4
+                    let previousAlpha = CGFloat(data[previousPixelInfo]) / CGFloat(255.0)
                     
                     if nextAlpha == 0 && currentAlpha != 0 {//Living on the edge
                         booleanArray[currentPixelInfo/4] = true
@@ -218,14 +216,13 @@ extension UIImage{
         }
         
         
-        var stop = CACurrentMediaTime()
+        let stop = CACurrentMediaTime()
         
         
         let image = imageFromARGB32Bitmap(buffer, width: width, height: height)
         
-        println(stop - start)
+        print(stop - start)
         return image!;
-        //self.imageView.image = image
         
     }
 
@@ -248,18 +245,16 @@ class JMCMarchingAnts: NSObject {
 
     //Gets a layer with selected edges and adds animation
     func getSelectionLayer(image:UIImage, imageView: UIView)->CAShapeLayer{
-        var boundaryShapeLayer = CAShapeLayer()
-        let path1  = self.convertEdgesToPath(image.CGImage)
-        let boundingBox = CGPathGetBoundingBox(path1)
-
-        UIGraphicsBeginImageContext(boundingBox.size)
-        let context  = UIGraphicsGetCurrentContext()
-        
-        CGContextAddPath(context, path1)
-        CGContextStrokePath(context)
-        
-       let img = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let boundaryShapeLayer = CAShapeLayer()
+        let path1  = self.convertEdgesToPath(image.CGImage!)
+//   let boundingBox = CGPathGetBoundingBox(path1)
+//        UIGraphicsBeginImageContext(boundingBox.size)
+//        let context  = UIGraphicsGetCurrentContext()
+//        
+//        CGContextAddPath(context, path1)
+//        CGContextStrokePath(context)
+//        
+//        UIGraphicsEndImageContext()
 
      
         
@@ -289,16 +284,16 @@ class JMCMarchingAnts: NSObject {
     
  //Converst Edges of the image to path
     func convertEdgesToPath(image:CGImageRef)->CGMutablePathRef{
-        var pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image))
+        let pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image))
         
         data = CFDataGetBytePtr(pixelData)
         
         // data = UnsafeMutablePointer<UInt8>(mdata)
         let height = CGImageGetHeight(image)
         let width = CGImageGetWidth(image)
-        var start = CACurrentMediaTime()
+        _ = CACurrentMediaTime()
         
-        var path = CGPathCreateMutable()
+        let path = CGPathCreateMutable()
         CGPathAddRect(path, nil, CGRectMake(0, 0, CGFloat(width), CGFloat(height)))
 
         visitedArray = [Bool](count: Int(width  * height), repeatedValue: false)
@@ -308,14 +303,14 @@ class JMCMarchingAnts: NSObject {
             for var x = 0; x < width; x++ {
                 
                 //Current one
-                var currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
-                var currentAlpha = CGFloat(data[currentPixelInfo+3]) / CGFloat(255.0)
+                let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
+                let currentAlpha = CGFloat(data[currentPixelInfo+3]) / CGFloat(255.0)
                 
                 
-                var downPixelInfo: Int = ((Int(width) * Int(y+1)) + Int(x)) * 4
-                var downAlpha = CGFloat(data[downPixelInfo+3]) / CGFloat(255.0)
+                let downPixelInfo: Int = ((Int(width) * Int(y+1)) + Int(x)) * 4
+                _ = CGFloat(data[downPixelInfo+3]) / CGFloat(255.0)
                 var currentPoint = CGPointMake(CGFloat(x ), CGFloat(y))
-                // println(currentPoint)
+                // print(currentPoint)
                 
                 if visitedArray[currentPixelInfo/4] == true {//if we didn't already check this point
                     continue
@@ -332,58 +327,58 @@ class JMCMarchingAnts: NSObject {
                 
                 while (adjacent){
                     
-                    // println(currentPoint)
+                    // print(currentPoint)
                     
                     if checkTopLeft(currentPoint, data: data, width: width, height: height)
                     {
                         
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y-1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y-1))
                         
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                     }
                     else if checkLeft(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                         
                     }
                     else if checkBottomLeft(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y+1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y+1))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                     }
                     else if checkBottom(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y+1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y+1))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                     }
                     else if checkBottomRight(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y+1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y+1))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                         
                     }
                     else if checkRight(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                         
                     }
                     else if checkTopRight(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y-1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y-1))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
                         
                     }
                     else if checkTop(currentPoint, data: data, width: width, height: height){
-                        var tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y-1))
+                        let tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y-1))
                         CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
                         currentPoint = tempPoint
                         
@@ -405,7 +400,7 @@ class JMCMarchingAnts: NSObject {
             return false
         }
         
-        var index = ((Int(width) * Int(point.y-1)) + Int(point.x+1)) * 4
+        let index = ((Int(width) * Int(point.y-1)) + Int(point.x+1)) * 4
         return checkPoint(index)
     }
     
@@ -415,7 +410,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y)) + Int(point.x+1)) * 4
+        let index = ((Int(width) * Int(point.y)) + Int(point.x+1)) * 4
         return checkPoint(index)
     }
     
@@ -425,7 +420,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y+1)) + Int(point.x+1)) * 4
+        let index = ((Int(width) * Int(point.y+1)) + Int(point.x+1)) * 4
         return checkPoint(index)
     }
     
@@ -436,7 +431,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y+1)) + Int(point.x)) * 4
+        let index = ((Int(width) * Int(point.y+1)) + Int(point.x)) * 4
         return checkPoint(index)
     }
     
@@ -446,7 +441,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y+1)) + Int(point.x-1)) * 4
+        let index = ((Int(width) * Int(point.y+1)) + Int(point.x-1)) * 4
         return checkPoint(index)
     }
     
@@ -456,7 +451,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y)) + Int(point.x-1)) * 4
+        let index = ((Int(width) * Int(point.y)) + Int(point.x-1)) * 4
         return checkPoint(index)
     }
     
@@ -466,7 +461,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y-1)) + Int(point.x-1)) * 4
+        let index = ((Int(width) * Int(point.y-1)) + Int(point.x-1)) * 4
         return checkPoint(index)
     }
     
@@ -476,7 +471,7 @@ class JMCMarchingAnts: NSObject {
         {
             return false
         }
-        var index = ((Int(width) * Int(point.y-1)) + Int(point.x)) * 4
+        let index = ((Int(width) * Int(point.y-1)) + Int(point.x)) * 4
         return checkPoint(index)
     }
     
@@ -484,7 +479,7 @@ class JMCMarchingAnts: NSObject {
     func checkPoint(index:Int )->Bool{
         
         //check if it is visible
-        var currentAlpha = CGFloat(data[index+3]) / CGFloat(255.0)
+        let currentAlpha = CGFloat(data[index+3]) / CGFloat(255.0)
         
         if visitedArray[index/4] == true{ //check if visited
             return false

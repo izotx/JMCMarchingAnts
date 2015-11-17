@@ -10,7 +10,6 @@
 		4026614C1BE7F52400BF39D6 /* 038420-glossy-black-icon-transport-travel-transportation-car9-sc44.png in Resources */ = {isa = PBXBuildFile; fileRef = 4026614B1BE7F52400BF39D6 /* 038420-glossy-black-icon-transport-travel-transportation-car9-sc44.png */; };
 		4026614D1BE7F52400BF39D6 /* 038420-glossy-black-icon-transport-travel-transportation-car9-sc44.png in Resources */ = {isa = PBXBuildFile; fileRef = 4026614B1BE7F52400BF39D6 /* 038420-glossy-black-icon-transport-travel-transportation-car9-sc44.png */; };
 		4049CD7E1BC2D43F00F1E353 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CD7D1BC2D43F00F1E353 /* AppDelegate.swift */; };
-		4049CD811BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 4049CD7F1BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodeld */; };
 		4049CD831BC2D43F00F1E353 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CD821BC2D43F00F1E353 /* ViewController.swift */; };
 		4049CD861BC2D43F00F1E353 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4049CD841BC2D43F00F1E353 /* Main.storyboard */; };
 		4049CD881BC2D43F00F1E353 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4049CD871BC2D43F00F1E353 /* Images.xcassets */; };
@@ -35,7 +34,6 @@
 		4049CD781BC2D43F00F1E353 /* JMCMarchingAnts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JMCMarchingAnts.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4049CD7C1BC2D43F00F1E353 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4049CD7D1BC2D43F00F1E353 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		4049CD801BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = JMCMarchingAnts.xcdatamodel; sourceTree = "<group>"; };
 		4049CD821BC2D43F00F1E353 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		4049CD851BC2D43F00F1E353 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4049CD871BC2D43F00F1E353 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
@@ -91,7 +89,6 @@
 				4049CD841BC2D43F00F1E353 /* Main.storyboard */,
 				4049CD871BC2D43F00F1E353 /* Images.xcassets */,
 				4049CD891BC2D43F00F1E353 /* LaunchScreen.xib */,
-				4049CD7F1BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodeld */,
 				4026614B1BE7F52400BF39D6 /* 038420-glossy-black-icon-transport-travel-transportation-car9-sc44.png */,
 				4049CD7B1BC2D43F00F1E353 /* Supporting Files */,
 			);
@@ -167,8 +164,9 @@
 		4049CD701BC2D43F00F1E353 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftMigration = 0710;
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0710;
 				ORGANIZATIONNAME = "Janusz Chudzynski";
 				TargetAttributes = {
 					4049CD771BC2D43F00F1E353 = {
@@ -229,7 +227,6 @@
 				4049CD831BC2D43F00F1E353 /* ViewController.swift in Sources */,
 				4049CDA41BC2D54B00F1E353 /* JMCMarchingAnts.swift in Sources */,
 				4049CD7E1BC2D43F00F1E353 /* AppDelegate.swift in Sources */,
-				4049CD811BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,6 +290,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -360,6 +358,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = JMCMarchingAnts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jmc.quiz.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -373,6 +372,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = JMCMarchingAnts/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jmc.quiz.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 			};
@@ -393,6 +393,7 @@
 				);
 				INFOPLIST_FILE = JMCMarchingAntsTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jmc.quiz.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -411,6 +412,7 @@
 				);
 				INFOPLIST_FILE = JMCMarchingAntsTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.jmc.quiz.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JMCMarchingAnts.app/JMCMarchingAnts";
@@ -448,19 +450,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCVersionGroup section */
-		4049CD7F1BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodeld */ = {
-			isa = XCVersionGroup;
-			children = (
-				4049CD801BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodel */,
-			);
-			currentVersion = 4049CD801BC2D43F00F1E353 /* JMCMarchingAnts.xcdatamodel */;
-			path = JMCMarchingAnts.xcdatamodeld;
-			sourceTree = "<group>";
-			versionGroupType = wrapper.xcdatamodel;
-		};
-/* End XCVersionGroup section */
 	};
 	rootObject = 4049CD701BC2D43F00F1E353 /* Project object */;
 }
