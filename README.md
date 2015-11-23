@@ -1,5 +1,5 @@
 # JMCMarchingAnts
-Example of adding marching ants selection to the edges of the images.
+Library that lets you add marching ants (animated) selection to the edges of the images.
 ![](https://raw.githubusercontent.com/izotx/JMCMarchingAnts/master/marchingAnts.gif)
 
 <h3>Usage:</h3>
