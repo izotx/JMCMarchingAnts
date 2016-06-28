@@ -138,8 +138,8 @@ extension UIImage{
         var booleanArray = [Bool](count: Int(width  * height), repeatedValue: false)
         
         //check vertically
-        for var y = 0; y < height-1; y++ {
-            for var x = 0; x < width; x++ {
+        for y in 0 ..< height-1 {
+            for x in 0 ..< width {
                 //Current one
                 let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
                 let currentAlpha = CGFloat(data[currentPixelInfo+0]) / CGFloat(255.0)
@@ -177,8 +177,8 @@ extension UIImage{
         }
         
         
-        for var y = 0; y < height-1; y++ {
-            for var x = 0; x < width-1; x++ {
+        for y in 0 ..< height-1 {
+            for x in 0 ..< width-1 {
                 
                 //Current one
                 let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
@@ -299,8 +299,8 @@ class JMCMarchingAnts: NSObject {
         visitedArray = [Bool](count: Int(width  * height), repeatedValue: false)
         
         //check vertically
-        for var y = 0; y < height-1; y++ {
-            for var x = 0; x < width; x++ {
+        for y in 0 ..< height-1 {
+            for x in 0 ..< width {
                 
                 //Current one
                 let currentPixelInfo: Int = ((Int(width) * Int(y)) + Int(x)) * 4
