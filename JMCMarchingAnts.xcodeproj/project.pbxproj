@@ -17,6 +17,7 @@
 		4049CD971BC2D43F00F1E353 /* JMCMarchingAntsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CD961BC2D43F00F1E353 /* JMCMarchingAntsTests.swift */; };
 		4049CDA41BC2D54B00F1E353 /* JMCMarchingAnts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CDA31BC2D54B00F1E353 /* JMCMarchingAnts.swift */; };
 		4049CDA51BC2D54B00F1E353 /* JMCMarchingAnts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4049CDA31BC2D54B00F1E353 /* JMCMarchingAnts.swift */; };
+		F4BC215223C187CD00A60704 /* CGPointNeighbor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BC215123C187CD00A60704 /* CGPointNeighbor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,6 +43,7 @@
 		4049CD951BC2D43F00F1E353 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4049CD961BC2D43F00F1E353 /* JMCMarchingAntsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JMCMarchingAntsTests.swift; sourceTree = "<group>"; };
 		4049CDA31BC2D54B00F1E353 /* JMCMarchingAnts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JMCMarchingAnts.swift; sourceTree = "<group>"; };
+		F4BC215123C187CD00A60704 /* CGPointNeighbor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGPointNeighbor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 				4049CD7D1BC2D43F00F1E353 /* AppDelegate.swift */,
 				4049CD821BC2D43F00F1E353 /* ViewController.swift */,
 				4049CDA31BC2D54B00F1E353 /* JMCMarchingAnts.swift */,
+				F4BC215123C187CD00A60704 /* CGPointNeighbor.swift */,
 				4049CD841BC2D43F00F1E353 /* Main.storyboard */,
 				4049CD871BC2D43F00F1E353 /* Images.xcassets */,
 				4049CD891BC2D43F00F1E353 /* LaunchScreen.xib */,
@@ -183,6 +186,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -226,6 +230,7 @@
 			files = (
 				4049CD831BC2D43F00F1E353 /* ViewController.swift in Sources */,
 				4049CDA41BC2D54B00F1E353 /* JMCMarchingAnts.swift in Sources */,
+				F4BC215223C187CD00A60704 /* CGPointNeighbor.swift in Sources */,
 				4049CD7E1BC2D43F00F1E353 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,6 +316,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -347,6 +353,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
