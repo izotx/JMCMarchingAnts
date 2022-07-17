@@ -26,7 +26,18 @@ along with JMCMarchingAnts.  If not, see <http://www.gnu.org/licenses/>.
 import UIKit
 import AVFoundation
 
+enum GeneralError: Error {
+    case cgContextNotCreated
+    case cgImageNotCreatedFromContext
+    case cgImageNotAvailable
+    case dataProviderNotCreated
+}
 
+extension CGRect {
+    init(size: CGSize) {
+        self.init(x: 0, y: 0, width: size.width, height: size.height)
+    }
+}
 
 extension UIImage{
     public struct PixelData {
@@ -39,103 +50,130 @@ extension UIImage{
     
             func fixedOrientation()->UIImage{
             UIGraphicsBeginImageContextWithOptions(self.size, false, self.scale);
-            self.drawInRect(CGRectMake(0, 0, self.size.width,self.size.height))
+                self.draw(in: CGRect(size: self.size))
             
             let normalizedImage = UIGraphicsGetImageFromCurrentImageContext();
             UIGraphicsEndImageContext();
-            return normalizedImage;
+            return normalizedImage!
         }
 
     /** Helper function for saving image to png binary */
-    func saveToPNG( filename:String){
-        let documentsPath:NSString = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0]
-        let destinationPath = documentsPath.stringByAppendingPathComponent(filename)
-        UIImagePNGRepresentation(self)!.writeToFile(destinationPath, atomically: true)
+    func saveToPNG( filename:String) throws {
+        let documentsPath:NSString = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString
+        let destinationPath = documentsPath.appendingPathComponent(filename)
+        try self.pngData()!.write(to: URL(fileURLWithPath: destinationPath))
         //UIImageJPEGRepresentation(image,1.0).writeToFile(destinationPath, atomically: true)
         
         
     }
 
     
-    static func invertImageWithBlackBackground( foregroundImage:UIImage, frame:CGRect)->UIImage{
+    static func invertImageWithBlackBackground( foregroundImage:UIImage, frame:CGRect) throws -> UIImage{
     
-        let realFrame =  AVMakeRectWithAspectRatioInsideRect(foregroundImage.size, frame)
+        let realFrame = AVMakeRect(aspectRatio: foregroundImage.size, insideRect: frame)
         UIGraphicsBeginImageContextWithOptions(frame.size, false, 1.0)
-        let context = UIGraphicsGetCurrentContext();
-        CGContextSetFillColorWithColor(context, UIColor.blackColor().CGColor)
-        CGContextFillRect(context, CGRectMake(0,0,frame.size.width,frame.size.height))
-    foregroundImage.drawInRect(CGRectMake(realFrame.origin.x,realFrame.origin.y,realFrame.size.width,realFrame.size.height), blendMode:CGBlendMode.DestinationOut, alpha: 1.0)
-        let cgimage =  CGBitmapContextCreateImage(context);
-        let image = UIImage(CGImage: cgimage!)
-        UIGraphicsEndImageContext();
-        return image;
+        defer {
+            UIGraphicsEndImageContext()
+        }
+        
+        guard let context = UIGraphicsGetCurrentContext() else {
+            throw GeneralError.cgContextNotCreated
+        }
+        
+        context.setFillColor(UIColor.black.cgColor)
+        context.fill(CGRect(size: frame.size))
+        foregroundImage.draw(in: realFrame, blendMode:CGBlendMode.destinationOut, alpha: 1.0)
+        if let cgimage = context.makeImage() {
+            return UIImage(cgImage: cgimage)
+            
+        }
+        throw GeneralError.cgImageNotCreatedFromContext
     }
     
     //Creates a ARGB Image
-    func argbImage()->UIImage?
+    func argbImage() throws -> UIImage
     {
-        let colorSpace:CGColorSpace = CGColorSpaceCreateDeviceRGB()!
-        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)
+        let colorSpace:CGColorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
         let bytesPerRow = 4 * self.size.width
-        let context = CGBitmapContextCreate(nil, Int(self.size.width), Int(self.size.height), 8, Int(bytesPerRow), colorSpace, bitmapInfo.rawValue)
+        guard let context = CGContext(data: nil, width: Int(self.size.width), height: Int(self.size.height), bitsPerComponent: 8, bytesPerRow: Int(bytesPerRow), space: colorSpace, bitmapInfo: bitmapInfo.rawValue) else {
+            throw GeneralError.cgContextNotCreated
+        }
+        
+        guard let cgImage = self.cgImage else {
+            throw GeneralError.cgImageNotAvailable
+        }
     
-        CGContextDrawImage(context, CGRectMake(0, 0, CGFloat(self.size.width), CGFloat(self.size.height)), self.CGImage)
-        let cgimage = CGBitmapContextCreateImage(context)
-        let img = UIImage(CGImage: cgimage!)
-        return img
+        context.draw(cgImage, in:CGRect(size: self.size))
+        if let cgimage = context.makeImage() {
+            return UIImage(cgImage: cgimage)
+        }
+        throw GeneralError.cgImageNotCreatedFromContext
     }
    
     //Image from raw bitmap
-    internal func imageFromARGB32Bitmap(pixels:[PixelData], width:Int, height:Int)->UIImage? {
+    internal func imageFromARGB32Bitmap(pixels:[PixelData], width:Int, height:Int) throws -> UIImage {
         let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.PremultipliedFirst.rawValue)
+        let bitmapInfo:CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedFirst.rawValue)
         let bitsPerComponent:Int = 8
         let bitsPerPixel:Int = 32
         
         assert(pixels.count == Int(width * height))
+        let pixelDataSize = MemoryLayout<PixelData>.size
         
         var data = pixels // Copy to mutable []
-        let providerRef = CGDataProviderCreateWithCFData(
-            NSData(bytes: &data, length: data.count * sizeof(PixelData))
-        )
+        guard let providerRef = CGDataProvider(
+            data: NSData(
+                bytes: &data,
+                length: data.count * pixelDataSize
+            )
+        ) else {
+            throw GeneralError.dataProviderNotCreated
+        }
         
-        
-        let cgim = CGImageCreate(
-            width,
-            height,
-            bitsPerComponent,
-            bitsPerPixel,
-            width * Int(sizeof(PixelData)),
-            rgbColorSpace,
-            bitmapInfo,
-            providerRef,
-            nil,
-            true,
-            CGColorRenderingIntent.RenderingIntentDefault
-        )
-        return UIImage(CGImage: cgim!)
+        if let cgim = CGImage(
+            width: width,
+            height: height,
+            bitsPerComponent: bitsPerComponent,
+            bitsPerPixel: bitsPerPixel,
+            bytesPerRow: width * pixelDataSize,
+            space: rgbColorSpace,
+            bitmapInfo: bitmapInfo,
+            provider: providerRef,
+            decode: nil,
+            shouldInterpolate: true,
+            intent: CGColorRenderingIntent.defaultIntent
+            ) {
+            return UIImage(cgImage: cgim)
+        }
+        throw GeneralError.cgImageNotCreatedFromContext
     }
 
     //Finds edges in the image (should be black and transparent colors only)
-    func findEdges()->UIImage{
-        let cgImage:CGImageRef = self.argbImage()!.CGImage!
+    func findEdges() throws -> UIImage {
+        guard let cgImage:CGImage = try self.argbImage().cgImage else {
+            throw GeneralError.cgImageNotAvailable
+        }
         ////
-        let pixelData = CGDataProviderCopyData(CGImageGetDataProvider(cgImage))
+        guard let dataProvider = cgImage.dataProvider else {
+            throw GeneralError.dataProviderNotCreated
+        }
         
+        let pixelData = dataProvider.data
         
         //var data = CFDataGetMutableBytePtr
         let mdata: UnsafePointer<UInt8> = CFDataGetBytePtr(pixelData)
-        let data = UnsafeMutablePointer<UInt8>(mdata)
-        let height = CGImageGetHeight(cgImage)
-        let width = CGImageGetWidth(cgImage)
+        let data = UnsafeMutablePointer<UInt8>(mutating:mdata)
+        let height = cgImage.height
+        let width = cgImage.width
         let start = CACurrentMediaTime()
         
         //create an empty buffer
         let emptyPixel = PixelData(a: 0, r: 0, g: 0, b: 0)
         let blackPixel = PixelData(a: 255, r: 255, g: 255, b: 255)
         
-        var buffer = [PixelData](count: Int(width  * height), repeatedValue: emptyPixel)
-        var booleanArray = [Bool](count: Int(width  * height), repeatedValue: false)
+        var buffer = [PixelData](repeating: emptyPixel, count: Int(width  * height))
+        var booleanArray = [Bool](repeating: false, count: Int(width  * height))
         
         //check vertically
         for y in 0 ..< height-1 {
@@ -219,10 +257,10 @@ extension UIImage{
         let stop = CACurrentMediaTime()
         
         
-        let image = imageFromARGB32Bitmap(buffer, width: width, height: height)
+        let image = try imageFromARGB32Bitmap(pixels: buffer, width: width, height: height)
         
         print(stop - start)
-        return image!;
+        return image;
         
     }
 
@@ -236,17 +274,22 @@ class JMCMarchingAnts: NSObject {
     var data: UnsafePointer<UInt8>! //pixel data
     
 //Adds ants to the view's layer
-    func addAnts(image:UIImage, imageView: UIView){
-        let inverted =  UIImage.invertImageWithBlackBackground(image, frame: imageView.bounds)
-        let edges = inverted.findEdges();
-        let selectionLayer = self.getSelectionLayer(edges, imageView: imageView)
+    
+    func addAnts(_ image:UIImage, imageView: UIView){
+        try? addAnts(image: image, imageView: imageView)
+    }
+    
+    func addAnts(image:UIImage, imageView: UIView) throws {
+        let inverted =  try UIImage.invertImageWithBlackBackground(foregroundImage: image, frame: imageView.bounds)
+        let edges = try inverted.findEdges();
+        let selectionLayer = try self.getSelectionLayer(image: edges, imageView: imageView)
         imageView.layer.addSublayer(selectionLayer)
     }
 
     //Gets a layer with selected edges and adds animation
-    func getSelectionLayer(image:UIImage, imageView: UIView)->CAShapeLayer{
+    func getSelectionLayer(image:UIImage, imageView: UIView) throws ->CAShapeLayer{
         let boundaryShapeLayer = CAShapeLayer()
-        let path1  = self.convertEdgesToPath(image.CGImage!)
+        let path1  = try self.convertEdgesToPath(image: image.cgImage!)
 //   let boundingBox = CGPathGetBoundingBox(path1)
 //        UIGraphicsBeginImageContext(boundingBox.size)
 //        let context  = UIGraphicsGetCurrentContext()
@@ -259,44 +302,49 @@ class JMCMarchingAnts: NSObject {
      
         
         //get real position of the image
-        let rect  =  AVMakeRectWithAspectRatioInsideRect(image.size, imageView.bounds)
-        let  scaleFactor = CGRectGetWidth(rect)/image.size.width
+        let rect  =  AVMakeRect(aspectRatio: image.size, insideRect: imageView.bounds)
+        let  scaleFactor = rect.width/image.size.width
 
-        var scaleTransform = CGAffineTransformIdentity;
-        scaleTransform = CGAffineTransformScale(scaleTransform, scaleFactor, scaleFactor);
+        var scaleTransform = CGAffineTransform.identity;
+        scaleTransform = scaleTransform.scaledBy(x: scaleFactor, y: scaleFactor);
         
         //Customize the look of the edges here
-        let scaledPath = CGPathCreateCopyByTransformingPath(path1, &scaleTransform)
+        let scaledPath = path1.copy(using: &scaleTransform)
         boundaryShapeLayer.frame = rect
         boundaryShapeLayer.path = scaledPath
-        boundaryShapeLayer.strokeColor = UIColor.whiteColor().CGColor
+        boundaryShapeLayer.strokeColor = UIColor.white.cgColor
         boundaryShapeLayer.lineDashPattern = [5,5]
         boundaryShapeLayer.lineDashPhase = 1
-        boundaryShapeLayer.fillColor = UIColor.clearColor().CGColor
+        boundaryShapeLayer.fillColor = UIColor.clear.cgColor
         
         //starts animation
         let caanimation = self.addDashAnimation()
         
-        boundaryShapeLayer.addAnimation(caanimation, forKey: "dash")
+        boundaryShapeLayer.add(caanimation, forKey: "dash")
         return boundaryShapeLayer
         
     }
     
  //Converst Edges of the image to path
-    func convertEdgesToPath(image:CGImageRef)->CGMutablePathRef{
-        let pixelData = CGDataProviderCopyData(CGImageGetDataProvider(image))
+    func convertEdgesToPath(image:CGImage) throws ->CGMutablePath {
+        guard let dataProvider = image.dataProvider else {
+            throw GeneralError.dataProviderNotCreated
+        }
+        
+        let pixelData = dataProvider.data
+
         
         data = CFDataGetBytePtr(pixelData)
         
         // data = UnsafeMutablePointer<UInt8>(mdata)
-        let height = CGImageGetHeight(image)
-        let width = CGImageGetWidth(image)
+        let height = image.height
+        let width = image.width
         _ = CACurrentMediaTime()
         
-        let path = CGPathCreateMutable()
-        CGPathAddRect(path, nil, CGRectMake(0, 0, CGFloat(width), CGFloat(height)))
+        let path = CGMutablePath()
+        path.addRect(CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
 
-        visitedArray = [Bool](count: Int(width  * height), repeatedValue: false)
+        visitedArray = [Bool](repeating: false, count: Int(width  * height))
         
         //check vertically
         for y in 0 ..< height-1 {
@@ -309,7 +357,7 @@ class JMCMarchingAnts: NSObject {
                 
                 let downPixelInfo: Int = ((Int(width) * Int(y+1)) + Int(x)) * 4
                 _ = CGFloat(data[downPixelInfo+3]) / CGFloat(255.0)
-                var currentPoint = CGPointMake(CGFloat(x ), CGFloat(y))
+                var currentPoint = CGPoint(x: CGFloat(x), y: CGFloat(y))
                 // print(currentPoint)
                 
                 if visitedArray[currentPixelInfo/4] == true {//if we didn't already check this point
@@ -323,70 +371,48 @@ class JMCMarchingAnts: NSObject {
                 }
                 
                 var adjacent = true
-                CGPathMoveToPoint(path, nil, CGFloat(x), CGFloat(y))
+                path.move(to: currentPoint)
                 
                 while (adjacent){
                     
                     // print(currentPoint)
+                    var neighbor: CGPointNeighbor? = nil
                     
                     if checkTopLeft(currentPoint, data: data, width: width, height: height)
                     {
-                        
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y-1))
-                        
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
+                        neighbor = .upperLeft
                     }
                     else if checkLeft(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
-                        
+                        neighbor = .left
                     }
                     else if checkBottomLeft(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x-1), CGFloat(currentPoint.y+1))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
+                        neighbor = .lowerLeft
                     }
                     else if checkBottom(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y+1))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
+                        neighbor = .lower
                     }
                     else if checkBottomRight(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y+1))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
-                        
+                        neighbor = .lowerRight
                     }
                     else if checkRight(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
-                        
+                        neighbor = .right
                     }
                     else if checkTopRight(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x+1), CGFloat(currentPoint.y-1))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
-                        
+                        neighbor = .upperRight
                     }
                     else if checkTop(currentPoint, data: data, width: width, height: height){
-                        let tempPoint = CGPointMake(CGFloat(currentPoint.x), CGFloat(currentPoint.y-1))
-                        CGPathAddLineToPoint(path, nil, tempPoint.x, tempPoint.y)
-                        currentPoint = tempPoint
-                        
-                        
+                        neighbor = .upper
                     }
                     else{
                         adjacent = false
                     }
+
+                    if let neighbor = neighbor {
+                        let adjacentPoint = currentPoint.adjacent(neighbor)
+                        path.addLine(to: adjacentPoint)
+                        currentPoint = adjacentPoint
+                    }
+
                 }
             }
         }
@@ -394,85 +420,85 @@ class JMCMarchingAnts: NSObject {
     }
     
     //Checking top right point
-    func checkTopRight(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkTopRight(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if Int(point.y) == 0 || Int(point.x) == width-1 //edge case
         {
             return false
         }
         
         let index = ((Int(width) * Int(point.y-1)) + Int(point.x+1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking right point
-    func checkRight(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkRight(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if  Int(point.y) == 0 || Int(point.x) == width-1 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y)) + Int(point.x+1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking bottom right point
-    func checkBottomRight(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkBottomRight(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if Int(point.y) == height-1 || Int(point.x) == width-1 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y+1)) + Int(point.x+1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     
     //Checking bottom
-    func checkBottom(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkBottom(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if  Int(point.y) == height-1 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y+1)) + Int(point.x)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking bottom left
-    func checkBottomLeft(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkBottomLeft(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if  Int(point.y) == height-1 || Int(point.x) == 0 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y+1)) + Int(point.x-1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking  left
-    func checkLeft(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkLeft(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if point.x == 0 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y)) + Int(point.x-1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking  Top left
-    func checkTopLeft(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkTopLeft(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if Int(point.x) == 0 || Int(point.y) == 0 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y-1)) + Int(point.x-1)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     //Checking Top
-    func checkTop(point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
+    func checkTop(_ point:CGPoint, data:UnsafePointer<UInt8>, width:Int, height:Int )->Bool{
         if   Int(point.y) == 0 //edge case
         {
             return false
         }
         let index = ((Int(width) * Int(point.y-1)) + Int(point.x)) * 4
-        return checkPoint(index)
+        return checkPoint(index: index)
     }
     
     

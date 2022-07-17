@@ -32,7 +32,7 @@ class ViewController: UIViewController {
     let marcher:JMCMarchingAnts = JMCMarchingAnts()
     
 
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if let image = imageView.image{
             //if image exists add it to the image view
